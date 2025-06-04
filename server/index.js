@@ -30,6 +30,8 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:3000',
     'https://ac-walla.vercel.app',
+    'https://ac-walla-one.vercel.app',
+    'https://ac-walla-y9wo.vercel.app',
     /\.vercel\.app$/
   ],
   credentials: true
