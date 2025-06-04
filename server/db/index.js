@@ -7,9 +7,14 @@ const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: process.env.NODE_ENV === 'production'
+});
+
+// Log connection status
+pool.on('connect', () => {
+  console.log('Connected to the database');
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('SSL enabled:', process.env.NODE_ENV === 'production');
 });
 
 pool.on('error', (err) => {
