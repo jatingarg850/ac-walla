@@ -5,10 +5,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: 'ep-muddy-sun-a841goek-pooler.eastus2.azure.neon.tech',
+  database: 'neondb',
+  user: 'neondb_owner',
+  password: 'npg_Ybrl6uhX2LVc',
+  port: 5432,
   ssl: {
-    rejectUnauthorized: true,
-    sslmode: 'require'
+    rejectUnauthorized: false
   }
 });
 
