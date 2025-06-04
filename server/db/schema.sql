@@ -31,14 +31,14 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 -- Create service_requests table
 CREATE TABLE IF NOT EXISTS service_requests (
     id SERIAL PRIMARY KEY,
-    name CHARACTER VARYING(100),
-    email CHARACTER VARYING(100),
-    phone CHARACTER VARYING(20),
-    service_type CHARACTER VARYING(100),
-    address TEXT,
-    preferred_date DATE,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    service_type VARCHAR(50) NOT NULL,
+    address TEXT NOT NULL,
+    preferred_date TIMESTAMP NOT NULL,
     message TEXT,
-    status CHARACTER VARYING(50),
+    status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -46,16 +46,14 @@ CREATE TABLE IF NOT EXISTS service_requests (
 CREATE TABLE IF NOT EXISTS ac_listings (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
-    title CHARACTER VARYING(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     description TEXT,
-    brand CHARACTER VARYING(100) NOT NULL,
+    brand VARCHAR(100) NOT NULL,
     manufacturing_year INTEGER NOT NULL,
-    ac_type CHARACTER VARYING(50) NOT NULL,
-    dimensions CHARACTER VARYING(100),
-    no_of_ac INTEGER NOT NULL,
-    price NUMERIC(10,2) NOT NULL,
-    photos TEXT[],
-    status CHARACTER VARYING(20) DEFAULT 'active',
+    ac_type VARCHAR(50) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    photos TEXT[] DEFAULT '{}',
+    status VARCHAR(20) DEFAULT 'available',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -88,4 +86,12 @@ CREATE TABLE IF NOT EXISTS buyer_inquiries (
     preferred_contact_time CHARACTER VARYING(50),
     status CHARACTER VARYING(20),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-); 
+);
+
+-- Add some sample AC listings for testing
+INSERT INTO ac_listings (title, brand, manufacturing_year, ac_type, price, description, photos, status)
+VALUES 
+    ('Samsung 1.5 Ton Split AC', 'Samsung', 2022, 'Split', 35000.00, '5 star rating, excellent condition', ARRAY['https://rukminim2.flixcart.com/image/850/1000/xif0q/air-conditioner-new/4/p/q/-original-imah79hh4fjrfxyn.jpeg?q=90&crop=false'], 'available'),
+    ('LG Window AC', 'LG', 2021, 'Window', 25000.00, '3 star rating, good condition', ARRAY['https://rukminim2.flixcart.com/image/850/1000/xif0q/air-conditioner-new/4/p/q/-original-imah79hh4fjrfxyn.jpeg?q=90&crop=false'], 'available'),
+    ('Voltas 2 Ton Split AC', 'Voltas', 2023, 'Split', 45000.00, 'Brand new condition', ARRAY['https://rukminim2.flixcart.com/image/850/1000/xif0q/air-conditioner-new/4/p/q/-original-imah79hh4fjrfxyn.jpeg?q=90&crop=false'], 'available')
+ON CONFLICT DO NOTHING; 

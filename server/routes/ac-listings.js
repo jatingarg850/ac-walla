@@ -21,21 +21,31 @@ router.get('/user/:userId', auth, async (req, res) => {
 
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching user AC listings:', err);
+    res.status(500).json({ 
+      message: 'Failed to fetch user AC listings',
+      error: err.message 
+    });
   }
 });
 
 // Get all AC listings
 router.get('/', async (req, res) => {
   try {
+    console.log('Fetching all AC listings...');
     const result = await pool.query(
-      'SELECT * FROM ac_listings ORDER BY created_at DESC'
+      'SELECT * FROM ac_listings WHERE status = $1 ORDER BY created_at DESC',
+      ['available']
     );
+    console.log(`Found ${result.rows.length} listings`);
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching AC listings:', err);
+    res.status(500).json({ 
+      message: 'Failed to fetch AC listings',
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 });
 
@@ -54,8 +64,11 @@ router.get('/:id', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching AC listing:', err);
+    res.status(500).json({ 
+      message: 'Failed to fetch AC listing',
+      error: err.message 
+    });
   }
 });
 
