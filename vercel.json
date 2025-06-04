@@ -16,17 +16,24 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "methods": ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"],
+      "methods": ["OPTIONS"],
       "headers": {
-        "Access-Control-Allow-Origin": "https://ac-walla-one.vercel.app",
-        "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Credentials": "true"
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "3600"
       },
       "continue": true
     },
     {
       "src": "/api/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+        "Access-Control-Allow-Credentials": "true"
+      },
       "dest": "/server/index.js"
     },
     {

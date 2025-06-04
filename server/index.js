@@ -28,17 +28,35 @@ app.use(express.json());
 
 // Configure CORS
 const corsOptions = {
-  origin: ['https://ac-walla-one.vercel.app'],
+  origin: [
+    'https://ac-walla-one.vercel.app',
+    'https://ac-walla-y9wo.vercel.app',
+    /\.vercel\.app$/
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  maxAge: 3600
 };
 
 app.use(cors(corsOptions));
 
 // Handle preflight requests
 app.options('*', cors(corsOptions));
+
+// Add error logging middleware
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function (data) {
+    console.log(`${req.method} ${req.path} - Status: ${res.statusCode}`);
+    if (res.statusCode >= 400) {
+      console.error('Response error:', data);
+    }
+    originalSend.call(this, data);
+  };
+  next();
+});
 
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
