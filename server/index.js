@@ -31,7 +31,9 @@ const corsOptions = {
   origin: [
     'https://ac-walla-one.vercel.app',
     'https://ac-walla-y9wo.vercel.app',
-    /\.vercel\.app$/
+    /\.vercel\.app$/,
+    'http://localhost:5173',
+    'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -45,11 +47,17 @@ app.use(cors(corsOptions));
 // Handle preflight requests
 app.options('*', cors(corsOptions));
 
-// Add error logging middleware
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
+// Add response logging middleware
 app.use((req, res, next) => {
   const originalSend = res.send;
   res.send = function (data) {
-    console.log(`${req.method} ${req.path} - Status: ${res.statusCode}`);
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Status: ${res.statusCode}`);
     if (res.statusCode >= 400) {
       console.error('Response error:', data);
     }
@@ -203,15 +211,16 @@ app.post('/api/auth/signup', async (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    message: 'Something broke!',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err : {}
   });
 });
 
 // Handle 404 routes
 app.use((req, res) => {
+  console.log(`404 - Route not found: ${req.method} ${req.path}`);
   res.status(404).json({ message: 'Route not found' });
 });
 

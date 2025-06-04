@@ -6,10 +6,15 @@ import auth from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Register User
-router.post('/register', async (req, res) => {
+// Signup/Register User
+const registerUser = async (req, res) => {
   try {
     const { username, email, password, address } = req.body;
+
+    // Validate input
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Please provide username, email, and password' });
+    }
 
     // Check if user already exists
     const userExists = await pool.query(
@@ -28,7 +33,7 @@ router.post('/register', async (req, res) => {
     // Create user
     const result = await pool.query(
       'INSERT INTO users (username, email, password, address) VALUES ($1, $2, $3, $4) RETURNING id, username, email, address',
-      [username, email, hashedPassword, address]
+      [username, email, hashedPassword, address || null]
     );
 
     const user = result.rows[0];
@@ -57,14 +62,26 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Error in register:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ 
+      message: 'Server error during registration', 
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
-});
+};
+
+// Register and Signup routes (both point to the same handler)
+router.post('/register', registerUser);
+router.post('/signup', registerUser);
 
 // Login User
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide email and password' });
+    }
 
     // Check if user exists
     const result = await pool.query(
@@ -109,7 +126,10 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Error in login:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ 
+      message: 'Server error during login', 
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 });
 
@@ -128,7 +148,10 @@ router.get('/me', auth, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Error in get current user:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ 
+      message: 'Server error fetching user data', 
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 });
 
@@ -144,7 +167,10 @@ router.post('/logout', auth, async (req, res) => {
     res.json({ message: 'Logged out successfully' });
   } catch (err) {
     console.error('Error in logout:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ 
+      message: 'Server error during logout', 
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 });
 
