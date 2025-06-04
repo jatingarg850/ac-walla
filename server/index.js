@@ -25,17 +25,20 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://ac-walla.vercel.app',
-    'https://ac-walla-one.vercel.app',
-    'https://ac-walla-y9wo.vercel.app',
-    /\.vercel\.app$/
-  ],
-  credentials: true
-}));
+
+// Configure CORS
+const corsOptions = {
+  origin: ['https://ac-walla-one.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
