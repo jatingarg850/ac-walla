@@ -7,6 +7,7 @@ import Button from '../commonComponents/button';
 import FormCard from './formCard';
 import CommonCard from './commonCard';
 import axios from 'axios';
+import config from '../../config/config';
 
 const Main = () => {
     const [oldAcListings, setOldAcListings] = useState([]);
@@ -18,7 +19,7 @@ const Main = () => {
 
     const fetchOldAcListings = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/ac-listings');
+            const response = await axios.get(`${config.apiBaseUrl}/ac-listings`);
             setOldAcListings(response.data);
         } catch (error) {
             console.error('Error fetching old AC listings:', error);

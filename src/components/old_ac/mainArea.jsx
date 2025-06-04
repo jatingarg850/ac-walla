@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ACDetailCard from './acDetailCard';
 import NewAcForm from './newAcForm';
 import '../../../src/index.css';
+import axios from 'axios';
+import config from '../../config/config';
 
 const MainArea = () => {
     const [activeTab, setActiveTab] = useState('listedAC');
@@ -12,13 +14,8 @@ const MainArea = () => {
     // Fetch all AC listings
     const fetchListings = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/ac-listings');
-            const data = await response.json();
-            if (response.ok) {
-                setListings(data);
-            } else {
-                setError('Failed to fetch AC listings');
-            }
+            const response = await axios.get(`${config.apiBaseUrl}/ac-listings`);
+            setListings(response.data);
         } catch (error) {
             console.error('Fetch listings error:', error);
             setError('Failed to connect to server');
@@ -31,17 +28,12 @@ const MainArea = () => {
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:5000/api/user/ac-listings', {
+            const response = await axios.get(`${config.apiBaseUrl}/user/ac-listings`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            const data = await response.json();
-            if (response.ok) {
-                setMyListings(data);
-            } else {
-                setError('Failed to fetch your AC listings');
-            }
+            setMyListings(response.data);
         } catch (error) {
             console.error('Fetch my listings error:', error);
             setError('Failed to connect to server');
