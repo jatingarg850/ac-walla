@@ -1,20 +1,27 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production'
+  connectionString: process.env.DATABASE_URL || "postgresql://neondb_owner:npg_Ybrl6uhX2LVc@ep-muddy-sun-a841goek-pooler.eastus2.azure.neon.tech/neondb?sslmode=require",
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Log connection status
 pool.on('connect', () => {
   console.log('Connected to the database');
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('SSL enabled:', process.env.NODE_ENV === 'production');
+  console.log('Environment:', process.env.NODE_ENV || 'development');
 });
 
 pool.on('error', (err) => {

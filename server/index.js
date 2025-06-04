@@ -1,75 +1,80 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from './db/index.js';
+
+// Import routes
+import authRoutes from './routes/auth.js';
+import acListingsRoutes from './routes/ac-listings.js';
+import serviceRequestsRoutes from './routes/service-requests.js';
 import userRoutes from './routes/users.js';
-import acListingRoutes from './routes/ac-listings.js';
 
-dotenv.config();
-
+// Initialize express
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Middleware
+app.use(express.json());
 app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://ac-gciw8guqt-coddyios-projects.vercel.app',
-    'https://ac-walla.vercel.app'
+    'https://ac-walla.vercel.app',
+    /\.vercel\.app$/
   ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  credentials: true
 }));
-app.use(express.json());
 
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('Database connected successfully at:', res.rows[0].now);
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({
+      status: 'healthy',
+      timestamp: result.rows[0].now,
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (err) {
+    console.error('Health check failed:', err);
+    res.status(500).json({
+      status: 'unhealthy',
+      error: err.message
+    });
   }
 });
 
-// Basic health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Test endpoint
+// Test database connection
 app.get('/api/test-db', async (req, res) => {
   try {
-    const testResult = await pool.query(`
-      SELECT 
-        (SELECT COUNT(*) FROM users) as users_count,
-        (SELECT COUNT(*) FROM ac_listings) as listings_count,
-        (SELECT COUNT(*) FROM service_requests) as requests_count,
-        NOW() as server_time
-    `);
-    
+    const result = await pool.query('SELECT NOW()');
     res.json({
-      status: 'success',
       message: 'Database connection successful',
-      data: testResult.rows[0],
-      database_url: process.env.DATABASE_URL ? 'Configured' : 'Missing'
+      timestamp: result.rows[0].now
     });
-  } catch (error) {
-    console.error('Database test error:', error);
+  } catch (err) {
+    console.error('Database connection test failed:', err);
     res.status(500).json({
-      status: 'error',
-      message: 'Database test failed',
-      error: error.message
+      message: 'Database connection failed',
+      error: err.message
     });
   }
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/ac-listings', acListingsRoutes);
+app.use('/api/service-requests', serviceRequestsRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/ac-listings', acListingRoutes);
 
 // Auth routes
 app.post('/api/auth/login', async (req, res) => {
@@ -176,23 +181,22 @@ app.post('/api/auth/signup', async (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
-    status: 'error',
-    message: err.message || 'Something broke!',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  res.status(500).json({
+    message: 'Something broke!',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
 });
 
 // Handle 404 routes
 app.use((req, res) => {
-  res.status(404).json({ 
-    status: 'error',
-    message: `Cannot ${req.method} ${req.url}`
-  });
+  res.status(404).json({ message: 'Route not found' });
 });
 
-// Start server
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-}); 
+  console.log(`Server running on port ${PORT}`);
+  console.log('Environment:', process.env.NODE_ENV || 'development');
+});
+
+export default app; 
