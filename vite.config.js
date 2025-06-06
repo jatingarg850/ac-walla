@@ -7,7 +7,18 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled'],
+          'firebase-vendor': ['firebase'],
+          'utils-vendor': ['axios', 'date-fns']
+        }
+      }
+    }
   },
   server: {
     port: 5173, // Using Vite's default port
