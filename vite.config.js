@@ -14,10 +14,18 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled'],
-          'firebase-vendor': ['firebase'],
           'utils-vendor': ['axios', 'date-fns']
         }
       }
+    }
+  },
+  resolve: {
+    mainFields: ['browser', 'module', 'main'],
+    alias: {
+      'firebase/app': 'firebase/app/dist/index.esm.js',
+      'firebase/auth': 'firebase/auth/dist/index.esm.js',
+      'firebase/firestore': 'firebase/firestore/dist/index.esm.js',
+      'firebase/storage': 'firebase/storage/dist/index.esm.js'
     }
   },
   server: {
