@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "vercel-build": "echo hello"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -13,7 +17,8 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.0"
+    "pg": "^8.16.0",
+    "@vercel/node": "^3.0.7"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.1",

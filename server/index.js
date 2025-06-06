@@ -1,11 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from './db/index.js';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -20,36 +23,45 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Configuration constants
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secure_jwt_secret_here';
+const NODE_ENV = process.env.NODE_ENV || 'production';
+
+// Allowed Origins
+const allowedOrigins = [
+  'https://ac-walla-one.vercel.app',
+  'https://server-alpha-eight-87.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
 
 // Middleware
 app.use(express.json());
 
-// Configure CORS
-const corsOptions = {
-  origin: [
-    'https://ac-walla-one.vercel.app',
-    'https://ac-walla-y9wo.vercel.app',
-    /\.vercel\.app$/,
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  credentials: true,
-  optionsSuccessStatus: 200,
-  maxAge: 3600
-};
-
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
+// CORS configuration
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 // Add request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
+  console.log('Headers:', req.headers);
   next();
 });
 
@@ -58,6 +70,7 @@ app.use((req, res, next) => {
   const originalSend = res.send;
   res.send = function (data) {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Status: ${res.statusCode}`);
+    console.log('Response headers:', res.getHeaders());
     if (res.statusCode >= 400) {
       console.error('Response error:', data);
     }
@@ -73,7 +86,7 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'healthy',
       timestamp: result.rows[0].now,
-      environment: process.env.NODE_ENV || 'development'
+      environment: NODE_ENV
     });
   } catch (err) {
     console.error('Health check failed:', err);
@@ -138,7 +151,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Create JWT token
     const token = jwt.sign(
       { id: user.id, isAdmin: user.is_admin },
-      process.env.JWT_SECRET || 'your_jwt_secret_key_here',
+      JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -224,11 +237,12 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log('Environment:', process.env.NODE_ENV || 'development');
-});
+// For Vercel, we export the app instead of calling listen
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Environment: ${NODE_ENV}`);
+  });
+}
 
 export default app; 

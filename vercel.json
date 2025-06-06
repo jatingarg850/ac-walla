@@ -9,39 +9,53 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist",
+        "buildCommand": "npm run build"
       }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://server-alpha-eight-87.vercel.app"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "server/index.js"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicon.ico"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "methods": ["OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Max-Age": "3600"
-      },
-      "continue": true
-    },
-    {
-      "src": "/api/(.*)",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
-        "Access-Control-Allow-Credentials": "true"
-      },
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/$1"
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico",
+      "status": 200
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 } 

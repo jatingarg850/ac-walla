@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../commonComponents/button';
+import config from '../../config/config';
+import axios from 'axios';
 
 const ContactSellerForm = ({ listing, onClose }) => {
     const [formData, setFormData] = useState({
@@ -29,30 +31,20 @@ const ContactSellerForm = ({ listing, onClose }) => {
         setSuccess(false);
 
         try {
-            const response = await fetch('http://localhost:5000/api/buyer-inquiries', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    acListingId: listing.id
-                })
+            const response = await axios.post(`${config.apiBaseUrl}/buyer-inquiries`, {
+                ...formData,
+                acListingId: listing.id
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 setSuccess(true);
                 setTimeout(() => {
                     onClose();
                 }, 2000);
-            } else {
-                setError(data.message || 'Failed to submit inquiry');
             }
         } catch (error) {
             console.error('Submit error:', error);
-            setError('Failed to connect to server. Please try again later.');
+            setError(error.response?.data?.message || 'Failed to submit inquiry');
         }
     };
 

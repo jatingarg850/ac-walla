@@ -26,6 +26,7 @@ import {
   InputLabel,
 } from '@mui/material';
 import { format } from 'date-fns';
+import config from '../config/config';
 
 const AdminPanel = () => {
   const { user, logout } = useAuth();
@@ -50,7 +51,7 @@ const AdminPanel = () => {
     // Fetch admin dashboard data
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+        const response = await fetch(`${config.apiBaseUrl}/admin/dashboard`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -67,7 +68,7 @@ const AdminPanel = () => {
     // Fetch service requests
     const fetchServiceRequests = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin/service-requests', {
+        const response = await fetch(`${config.apiBaseUrl}/admin/service-requests`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -87,7 +88,7 @@ const AdminPanel = () => {
     // Fetch buyer inquiries
     const fetchBuyerInquiries = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin/buyer-inquiries', {
+        const response = await fetch(`${config.apiBaseUrl}/admin/buyer-inquiries`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -111,7 +112,7 @@ const AdminPanel = () => {
 
   const handleStatusChange = async (requestId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/service-requests/${requestId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/admin/service-requests/${requestId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ const AdminPanel = () => {
 
   const updateServiceRequestStatus = async (id, status) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/service-requests/${id}`, {
+      const response = await fetch(`${config.apiBaseUrl}/admin/service-requests/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

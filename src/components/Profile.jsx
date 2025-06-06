@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { FaUser, FaEnvelope, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
+import config from '../config/config';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -25,7 +26,7 @@ const Profile = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/users/${user.id}`, {
+      const response = await axios.get(`${config.apiBaseUrl}/users/${user.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -45,7 +46,7 @@ const Profile = () => {
 
   const fetchUserListings = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/ac-listings/user/${user.id}`, {
+      const response = await axios.get(`${config.apiBaseUrl}/ac-listings/user/${user.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -61,7 +62,7 @@ const Profile = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5000/api/users/${user.id}`, 
+        `${config.apiBaseUrl}/users/${user.id}`, 
         editedProfile,
         {
           headers: {

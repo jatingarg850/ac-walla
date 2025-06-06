@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import '../../../src/index.css';
 import Button from "../commonComponents/button";
+import axios from 'axios';
+import config from '../../config/config';
 
 const ACListingForm = ({ onSubmitSuccess }) => {
     const [formData, setFormData] = useState({
@@ -108,28 +110,19 @@ const ACListingForm = ({ onSubmitSuccess }) => {
             // Filter out any null or empty photos
             const validPhotos = formData.photos.filter(photo => photo !== null && photo !== '');
 
-            const response = await fetch('http://localhost:5000/api/ac-listings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    title: formData.title,
-                    description: formData.description || '',
-                    brand: formData.brand,
-                    manufacturing_year: parseInt(formData.manufacturingYear),
-                    ac_type: formData.acType,
-                    dimensions: formData.dimensions || '',
-                    no_of_ac: parseInt(formData.noOfAC),
-                    price: parseFloat(formData.price),
-                    photos: validPhotos
-                })
+            const response = await axios.post(`${config.apiBaseUrl}/ac-listings`, {
+                title: formData.title,
+                description: formData.description || '',
+                brand: formData.brand,
+                manufacturing_year: parseInt(formData.manufacturingYear),
+                ac_type: formData.acType,
+                dimensions: formData.dimensions || '',
+                no_of_ac: parseInt(formData.noOfAC),
+                price: parseFloat(formData.price),
+                photos: validPhotos
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 setSuccess(true);
                 // Clear form
                 setFormData({
@@ -147,12 +140,10 @@ const ACListingForm = ({ onSubmitSuccess }) => {
                 if (onSubmitSuccess) {
                     onSubmitSuccess();
                 }
-            } else {
-                setError(data.message || 'Failed to submit AC listing');
             }
         } catch (error) {
             console.error('Submit error:', error);
-            setError('Failed to connect to server. Please try again later.');
+            setError(error.response?.data?.message || 'Failed to submit AC listing');
         }
     };
 

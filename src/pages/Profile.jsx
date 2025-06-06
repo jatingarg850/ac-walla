@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaEdit } from 'react-icons/fa';
+import config from '../config/config';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -59,7 +60,7 @@ const Profile = () => {
   const fetchUserProfile = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:5000/api/users/${user.id}`, {
+      const response = await axios.get(`${config.apiBaseUrl}/users/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -85,7 +86,7 @@ const Profile = () => {
   const fetchUserListings = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:5000/api/ac-listings/user/${user.id}`, {
+      const response = await axios.get(`${config.apiBaseUrl}/ac-listings/user/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -104,7 +105,7 @@ const Profile = () => {
     setError('');
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/users/${user.id}`, 
+        `${config.apiBaseUrl}/users/${user.id}`, 
         editedProfile,
         {
           headers: {

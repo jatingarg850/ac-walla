@@ -1,35 +1,29 @@
 import pg from 'pg';
-import dotenv from 'dotenv';
-import path from 'path';
 import { fileURLToPath } from 'url';
+import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
-
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL environment variable is not set');
-  process.exit(1);
-}
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+// Database configuration
+const databaseConfig = {
+  connectionString: 'postgresql://neondb_owner:npg_Ybrl6uhX2LVc@ep-muddy-sun-a841goek-pooler.eastus2.azure.neon.tech/neondb?sslmode=require',
   ssl: {
     rejectUnauthorized: false
   },
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-});
+};
+
+const pool = new Pool(databaseConfig);
 
 // Log connection status
 pool.on('connect', () => {
   console.log('Connected to the database');
-  console.log('Environment:', process.env.NODE_ENV || 'development');
+  console.log('Environment: production');
 });
 
 pool.on('error', (err) => {

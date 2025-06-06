@@ -5,6 +5,21 @@ import config from '../config/config';
 // Configure axios defaults
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = config.apiBaseUrl;
+axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+// Add request interceptor to handle CORS
+axios.interceptors.request.use((config) => {
+  if (!config.headers.Authorization) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 const AuthContext = createContext();
 
