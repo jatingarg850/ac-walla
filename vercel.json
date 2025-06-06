@@ -50,12 +50,5 @@
       "source": "/:path*",
       "destination": "/"
     }
-  ],
-  "routes": [
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico",
-      "status": 200
-    }
   ]
 } 
